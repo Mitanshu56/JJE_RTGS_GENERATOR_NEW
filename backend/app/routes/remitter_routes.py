@@ -6,20 +6,14 @@ from ..database import get_db
 from ..models.remitter import Remitter
 from ..models.user import User
 from ..schemas.remitter_schema import RemitterCreate, RemitterUpdate, RemitterResponse
+from ..services.auth_service import get_current_active_user
 
 router = APIRouter(tags=["remitter"])
-
-# Temporary: hardcoded user ID for testing (use the first user)
-def get_test_user(db: Session = Depends(get_db)):
-    user = db.query(User).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="No users found. Please create an account first.")
-    return user
 
 
 @router.get("/me", response_model=Optional[RemitterResponse])
 async def get_my_bank_details(
-    current_user: User = Depends(get_test_user),
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Get current user's bank details (remitter information)"""
@@ -30,7 +24,7 @@ async def get_my_bank_details(
 @router.post("/", response_model=RemitterResponse, status_code=status.HTTP_201_CREATED)
 async def create_bank_details(
     remitter_data: RemitterCreate,
-    current_user: User = Depends(get_test_user),
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Create bank details for current user"""
@@ -57,7 +51,7 @@ async def create_bank_details(
 @router.put("/", response_model=RemitterResponse)
 async def update_bank_details(
     remitter_data: RemitterUpdate,
-    current_user: User = Depends(get_test_user),
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Update current user's bank details"""
@@ -81,7 +75,7 @@ async def update_bank_details(
 
 @router.delete("/")
 async def delete_bank_details(
-    current_user: User = Depends(get_test_user),
+    current_user: User = Depends(get_current_active_user),
     db: Session = Depends(get_db)
 ):
     """Delete current user's bank details"""
