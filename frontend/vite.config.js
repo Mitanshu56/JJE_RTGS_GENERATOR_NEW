@@ -16,5 +16,18 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['@headlessui/react', 'lucide-react'],
+        }
+      }
+    }
   },
+  preview: {
+    port: 3000,
+    host: true
+  }
 })

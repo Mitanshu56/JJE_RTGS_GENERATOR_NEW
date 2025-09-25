@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { 
   CreditCard, 
   Users, 
@@ -17,8 +18,8 @@ import {
   Activity,
   Sparkles
 } from 'lucide-react'
-
 import { transactionAPI } from '../services/api'
+import api from '../services/api'
 import { authService } from '../services/authService'
 
 const Dashboard = () => {
@@ -41,14 +42,9 @@ const Dashboard = () => {
 
   const checkBankDetails = async () => {
     try {
-      const token = localStorage.getItem('token')
-      const response = await fetch('http://localhost:8000/api/remitter/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      })
+      const response = await api.get('/remitter/me')
       
-      setBankDetailsSetup(response.ok)
+      setBankDetailsSetup(true)
     } catch (error) {
       console.error('Error checking bank details:', error)
       setBankDetailsSetup(false)
