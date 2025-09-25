@@ -26,6 +26,8 @@ export default defineConfig({
       }
     }
   },
+  // Add SPA fallback for client-side routing
+  appType: 'spa',
   preview: {
     port: 3000,
     host: true
