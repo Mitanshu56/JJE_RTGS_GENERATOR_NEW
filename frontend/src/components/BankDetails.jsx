@@ -3,24 +3,7 @@ import api from '../services/api';
 
 const BankDetails = () => {
     const [formData, setFormData] = useState({
-        accou            {message && (
-                <div className={`p-4 rounded-md mb-6 ${
-                    message.includes('successfully') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
-                }`}>
-                    {message}
-                </div>
-            )}
-            
-            {/* Debug Information - Remove in production */}
-            {process.env.NODE_ENV === 'development' && (
-                <div className="bg-gray-50 p-4 rounded-md mb-6 text-xs">
-                    <strong>Debug Info:</strong><br/>
-                    API Base URL: {api.defaults.baseURL}<br/>
-                    Has Details: {hasDetails.toString()}<br/>
-                    Editing: {editing.toString()}<br/>
-                    Environment: {import.meta.env.VITE_API_URL || 'Not set'}
-                </div>
-            )}er: '',
+        account_number: '',
         account_name: '',
         bank_name: '',
         branch_name: '',
