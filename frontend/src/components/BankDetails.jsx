@@ -187,18 +187,6 @@ const BankDetails = () => {
                 </div>
             )}
 
-            {/* Debug Information - Shows current state and API config */}
-            <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md mb-6 text-sm">
-                <strong>🔍 Debug Info:</strong><br/>
-                <div className="mt-2 space-y-1">
-                    <div><strong>API Base URL:</strong> {api.defaults.baseURL || 'Not set'}</div>
-                    <div><strong>Environment API URL:</strong> {import.meta.env.VITE_API_URL || 'Not set'}</div>
-                    <div><strong>Has Details:</strong> {hasDetails.toString()}</div>
-                    <div><strong>Editing Mode:</strong> {editing.toString()}</div>
-                    <div><strong>Loading:</strong> {loading.toString()}</div>
-                </div>
-            </div>
-
             {/* Show message when no bank details exist and not editing */}
             {!hasDetails && !editing && (
                 <div className="text-center py-12 bg-gray-50 rounded-lg">
