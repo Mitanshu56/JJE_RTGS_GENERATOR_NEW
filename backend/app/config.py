@@ -1,6 +1,6 @@
 from pydantic_settings import BaseSettings
-from pydantic import field_validator
-from typing import Optional, List
+from pydantic import field_validator, Field, model_validator
+from typing import Optional, List, Union, Any
 import os
 
 
@@ -54,14 +54,18 @@ class Settings(BaseSettings):
         # For any other type, return default
         return 8000
     
-    # CORS - using simple list (add your production domains here)
-    cors_origins: List[str] = [
-        "http://localhost:3000", 
-        "http://localhost:3001", 
-        "http://localhost:5173",
-        "https://*.render.com",  # Allow all Render subdomains
-        "*"  # Allow all origins for now (restrict this in production)
-    ]
+    # CORS origins - will be converted from string if needed
+    cors_origins: Union[str, List[str]] = "http://localhost:3000,http://localhost:3001,http://localhost:5173,*"
+    
+    @model_validator(mode='after')
+    def convert_cors_origins(self) -> 'Settings':
+        """Convert cors_origins from string to list if needed"""
+        if isinstance(self.cors_origins, str):
+            if ',' in self.cors_origins:
+                self.cors_origins = [origin.strip() for origin in self.cors_origins.split(',') if origin.strip()]
+            else:
+                self.cors_origins = [self.cors_origins.strip()] if self.cors_origins.strip() else ["*"]
+        return self
     
     # App
     app_name: str = "RTGS Automation App"
@@ -76,6 +80,8 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         extra = "ignore"
+        env_nested_delimiter = '__'
+        env_parse_none_str = 'None'
 
 
 # Create settings instance
