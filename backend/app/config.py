@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 from typing import Optional, List
+import os
 
 
 class Settings(BaseSettings):
@@ -16,8 +17,14 @@ class Settings(BaseSettings):
     api_port: int = 8000
     debug: bool = True
     
-    # CORS - using simple list
-    cors_origins: List[str] = ["http://localhost:3000", "http://localhost:3001", "http://localhost:5173"]
+    # CORS - using simple list (add your production domains here)
+    cors_origins: List[str] = [
+        "http://localhost:3000", 
+        "http://localhost:3001", 
+        "http://localhost:5173",
+        "https://*.render.com",  # Allow all Render subdomains
+        "*"  # Allow all origins for now (restrict this in production)
+    ]
     
     # App
     app_name: str = "RTGS Automation App"
@@ -31,7 +38,15 @@ class Settings(BaseSettings):
     
     class Config:
         env_file = ".env"
-        extra = "ignore"  # This allows extra fields without validation errors
+        extra = "ignore"
 
 
+# Create settings instance
 settings = Settings()
+
+# Override port with PORT environment variable if it exists (for Render)
+if os.getenv('PORT'):
+    try:
+        settings.api_port = int(os.getenv('PORT'))
+    except (ValueError, TypeError):
+        settings.api_port = 8000

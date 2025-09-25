@@ -8,9 +8,13 @@ sys.path.insert(0, backend_dir)
 try:
     import uvicorn
     from app.main import app
+    from app.config import settings
     
-    print("Starting RTGS Automation Backend Server...")
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    # Use PORT environment variable if available (for Render), otherwise use settings
+    port = int(os.getenv('PORT', settings.api_port))
+    
+    print(f"Starting RTGS Automation Backend Server on port {port}...")
+    uvicorn.run(app, host=settings.api_host, port=port, reload=settings.debug)
 except ImportError as e:
     print(f"Import error: {e}")
     print("Please check if all dependencies are installed")
