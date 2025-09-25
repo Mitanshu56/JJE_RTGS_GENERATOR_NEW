@@ -12,7 +12,7 @@ class RemitterBase(BaseModel):
     swift_code: Optional[str] = Field(None, max_length=11, description="SWIFT code")
     pan_number: Optional[str] = Field(None, min_length=10, max_length=10, description="PAN number")
     address: Optional[str] = Field(None, max_length=500, description="Complete address")
-    mobile: Optional[str] = Field(None, pattern=r'^[6-9]\d{9}$', description="Mobile number")
+    mobile: Optional[str] = Field(None, min_length=10, max_length=15, description="Mobile number")
     email: Optional[str] = Field(None, pattern=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', description="Email address")
 
     @field_validator('ifsc_code')
@@ -32,8 +32,8 @@ class RemitterBase(BaseModel):
     @field_validator('pan_number')
     @classmethod
     def validate_pan(cls, v):
-        if v and (len(v) != 10 or not v[:5].isalpha() or not v[5:9].isdigit() or not v[9].isalpha()):
-            raise ValueError('PAN number must be in format: AAAAA9999A')
+        if v and len(v) != 10:
+            raise ValueError('PAN number must be 10 characters')
         return v.upper() if v else v
 
 
@@ -50,7 +50,7 @@ class RemitterUpdate(BaseModel):
     swift_code: Optional[str] = Field(None, max_length=11)
     pan_number: Optional[str] = Field(None, min_length=10, max_length=10)
     address: Optional[str] = Field(None, max_length=500)
-    mobile: Optional[str] = Field(None, pattern=r'^[6-9]\d{9}$')
+    mobile: Optional[str] = Field(None, min_length=10, max_length=15)
     email: Optional[str] = Field(None, pattern=r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
     is_active: Optional[bool] = None
 
@@ -71,8 +71,8 @@ class RemitterUpdate(BaseModel):
     @field_validator('pan_number')
     @classmethod
     def validate_pan(cls, v):
-        if v and (len(v) != 10 or not v[:5].isalpha() or not v[5:9].isdigit() or not v[9].isalpha()):
-            raise ValueError('PAN number must be in format: AAAAA9999A')
+        if v and len(v) != 10:
+            raise ValueError('PAN number must be 10 characters')
         return v.upper() if v else v
 
 
