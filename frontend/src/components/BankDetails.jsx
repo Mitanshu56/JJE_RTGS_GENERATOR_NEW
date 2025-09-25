@@ -169,12 +169,12 @@ const BankDetails = () => {
         <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">Bank Details</h2>
-                {hasDetails && !editing && (
+                {!editing && (
                     <button
                         onClick={handleEdit}
                         className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                     >
-                        Edit Details
+                        {hasDetails ? 'Edit Details' : 'Add Bank Details'}
                     </button>
                 )}
             </div>
@@ -199,7 +199,22 @@ const BankDetails = () => {
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Show message when no bank details exist and not editing */}
+            {!hasDetails && !editing && (
+                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                    <div className="mb-4">
+                        <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 48 48">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5a2 2 0 00-2 2v10a2 2 0 002 2h14m-5-2v2a2 2 0 002 2h2a2 2 0 002-2V9a2 2 0 00-2-2h-2a2 2 0 00-2 2v2m-5 4h10" />
+                        </svg>
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Bank Details Added</h3>
+                    <p className="text-gray-500 mb-6">You haven't added your bank details yet. Click the "Add Bank Details" button above to get started.</p>
+                </div>
+            )}
+
+            {/* Show form when editing or when has details */}
+            {(editing || hasDetails) && (
+                <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label htmlFor="account_name" className="block text-sm font-medium text-gray-700 mb-2">
@@ -358,6 +373,7 @@ const BankDetails = () => {
                     </div>
                 )}
             </form>
+            )}
         </div>
     );
 };
