@@ -3,7 +3,24 @@ import api from '../services/api';
 
 const BankDetails = () => {
     const [formData, setFormData] = useState({
-        account_number: '',
+        accou            {message && (
+                <div className={`p-4 rounded-md mb-6 ${
+                    message.includes('successfully') ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'
+                }`}>
+                    {message}
+                </div>
+            )}
+            
+            {/* Debug Information - Remove in production */}
+            {process.env.NODE_ENV === 'development' && (
+                <div className="bg-gray-50 p-4 rounded-md mb-6 text-xs">
+                    <strong>Debug Info:</strong><br/>
+                    API Base URL: {api.defaults.baseURL}<br/>
+                    Has Details: {hasDetails.toString()}<br/>
+                    Editing: {editing.toString()}<br/>
+                    Environment: {import.meta.env.VITE_API_URL || 'Not set'}
+                </div>
+            )}er: '',
         account_name: '',
         bank_name: '',
         branch_name: '',
@@ -23,13 +40,18 @@ const BankDetails = () => {
     }, []);
 
     const fetchBankDetails = async () => {
+        console.log('🔍 Fetching bank details...');
+        console.log('🌐 API Base URL:', api.defaults.baseURL);
+        
         try {
             const response = await api.get('/remitter/me');
+            console.log('✅ Bank details response:', response.data);
             
             if (response.data) {
                 const data = response.data;
                 // Check if data is not null and has the required properties
                 if (data && typeof data === 'object') {
+                    console.log('📝 Setting form data with:', data);
                     setFormData({
                         account_number: data.account_number || '',
                         account_name: data.account_name || '',
@@ -41,17 +63,30 @@ const BankDetails = () => {
                         mobile: data.mobile || ''
                     });
                     setHasDetails(true);
+                    console.log('✅ Bank details loaded successfully');
                 } else {
                     // Data is null or invalid, treat as no bank details
+                    console.log('⚠️ No bank details data received');
                     setHasDetails(false);
                     setEditing(true);
                 }
             }
         } catch (error) {
+            console.error('❌ Error fetching bank details:', error);
+            console.log('📊 Error details:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                message: error.message
+            });
+            
             if (error.response && error.response.status === 404) {
                 // No bank details found
+                console.log('📭 No bank details found (404)');
                 setHasDetails(false);
                 setEditing(true);
+            } else if (error.response?.status === 401) {
+                console.log('🔐 Authentication required (401)');
+                setMessage('Authentication required. Please log in again.');
             } else {
                 console.error('Error fetching bank details:', error);
                 setMessage('Error loading bank details');
@@ -61,16 +96,24 @@ const BankDetails = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log('📤 Submitting bank details form...');
+        console.log('📊 Form data:', formData);
+        console.log('📝 Has existing details:', hasDetails);
+        
         setLoading(true);
         setMessage('');
 
         try {
             let response;
             if (hasDetails) {
+                console.log('🔄 Updating existing bank details via PUT');
                 response = await api.put('/remitter/', formData);
             } else {
+                console.log('🆕 Creating new bank details via POST');
                 response = await api.post('/remitter/', formData);
             }
+
+            console.log('✅ Bank details saved successfully:', response.data);
 
             if (response.data) {
                 const data = response.data;
@@ -92,7 +135,13 @@ const BankDetails = () => {
                 setMessage('Bank details saved successfully!');
             }
         } catch (error) {
-            console.error('Error saving bank details:', error);
+            console.error('❌ Error saving bank details:', error);
+            console.log('📊 Error details:', {
+                status: error.response?.status,
+                data: error.response?.data,
+                message: error.message
+            });
+            
             if (error.response?.data?.detail) {
                 // Handle validation errors from backend
                 if (Array.isArray(error.response.data.detail)) {
@@ -154,6 +203,18 @@ const BankDetails = () => {
                     {message}
                 </div>
             )}
+
+            {/* Debug Information - Shows current state and API config */}
+            <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-md mb-6 text-sm">
+                <strong>🔍 Debug Info:</strong><br/>
+                <div className="mt-2 space-y-1">
+                    <div><strong>API Base URL:</strong> {api.defaults.baseURL || 'Not set'}</div>
+                    <div><strong>Environment API URL:</strong> {import.meta.env.VITE_API_URL || 'Not set'}</div>
+                    <div><strong>Has Details:</strong> {hasDetails.toString()}</div>
+                    <div><strong>Editing Mode:</strong> {editing.toString()}</div>
+                    <div><strong>Loading:</strong> {loading.toString()}</div>
+                </div>
+            </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
