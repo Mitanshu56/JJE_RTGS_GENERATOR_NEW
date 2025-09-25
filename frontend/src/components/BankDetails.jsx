@@ -93,7 +93,21 @@ const BankDetails = () => {
             }
         } catch (error) {
             console.error('Error saving bank details:', error);
-            setMessage('Error saving bank details. Please try again.');
+            if (error.response?.data?.detail) {
+                // Handle validation errors from backend
+                if (Array.isArray(error.response.data.detail)) {
+                    const errorMessages = error.response.data.detail.map(err => err.msg || err.message || err).join(', ');
+                    setMessage(`Validation Error: ${errorMessages}`);
+                } else {
+                    setMessage(`Error: ${error.response.data.detail}`);
+                }
+            } else if (error.response?.status === 401) {
+                setMessage('Authentication required. Please log in again.');
+            } else if (error.response?.status === 403) {
+                setMessage('Access denied. Please check your permissions.');
+            } else {
+                setMessage('Error saving bank details. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
@@ -246,7 +260,7 @@ const BankDetails = () => {
 
                     <div>
                         <label htmlFor="pan_number" className="block text-sm font-medium text-gray-700 mb-2">
-                            PAN Number *
+                            PAN Number
                         </label>
                         <input
                             type="text"
@@ -254,7 +268,6 @@ const BankDetails = () => {
                             name="pan_number"
                             value={formData.pan_number}
                             onChange={handleChange}
-                            required
                             disabled={!editing}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-600"
                             placeholder="Enter PAN number"
@@ -263,7 +276,7 @@ const BankDetails = () => {
 
                     <div>
                         <label htmlFor="mobile" className="block text-sm font-medium text-gray-700 mb-2">
-                            Mobile Number *
+                            Mobile Number
                         </label>
                         <input
                             type="tel"
@@ -271,7 +284,6 @@ const BankDetails = () => {
                             name="mobile"
                             value={formData.mobile}
                             onChange={handleChange}
-                            required
                             disabled={!editing}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-600"
                             placeholder="Enter mobile number"
