@@ -10,16 +10,19 @@ const Login = ({ onLogin }) => {
   const [isSignup, setIsSignup] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [loginError, setLoginError] = useState('')
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset
+    reset,
+    clearErrors
   } = useForm()
 
   const onSubmit = async (data) => {
     setLoading(true)
+    setLoginError('') // Clear any previous login errors
     
     try {
       if (isSignup) {
@@ -47,11 +50,30 @@ const Login = ({ onLogin }) => {
       }
     } catch (error) {
       console.error('Auth error:', error)
-      const message = error.response?.data?.detail || 'Authentication failed'
-      toast.error(message)
+      
+      if (!isSignup) {
+        // For login errors, show custom message instead of toast
+        if (error.response?.status === 401 || error.response?.data?.detail?.includes('Invalid credentials')) {
+          setLoginError('Invalid email or password. Please try again.')
+        } else {
+          setLoginError(error.response?.data?.detail || 'Login failed. Please try again.')
+        }
+      } else {
+        // For signup errors, use toast
+        const message = error.response?.data?.detail || 'Account creation failed'
+        toast.error(message)
+      }
     } finally {
       setLoading(false)
     }
+  }
+
+  // Clear login error when switching between login/signup
+  const toggleMode = () => {
+    setIsSignup(!isSignup)
+    setLoginError('')
+    reset()
+    clearErrors()
   }
 
   return (
@@ -133,7 +155,7 @@ const Login = ({ onLogin }) => {
                 <input
                   {...register('password', { 
                     required: 'Password is required',
-                    minLength: { value: 6, message: 'Password must be at least 6 characters' }
+                    ...(isSignup && { minLength: { value: 6, message: 'Password must be at least 6 characters' } })
                   })}
                   type={showPassword ? 'text' : 'password'}
                   className="input pl-10 pr-10"
@@ -155,6 +177,10 @@ const Login = ({ onLogin }) => {
               </div>
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+              )}
+              {/* Show login error for wrong credentials */}
+              {!isSignup && loginError && (
+                <p className="mt-1 text-sm text-red-600">{loginError}</p>
               )}
             </div>
           </div>
@@ -180,10 +206,7 @@ const Login = ({ onLogin }) => {
             <button
               type="button"
               className="text-primary-600 hover:text-primary-500 text-sm font-medium"
-              onClick={() => {
-                setIsSignup(!isSignup)
-                reset()
-              }}
+              onClick={toggleMode}
             >
               {isSignup 
                 ? 'Already have an account? Sign in' 
